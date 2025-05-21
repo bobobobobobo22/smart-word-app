@@ -1,109 +1,92 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, FlatList, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import words from './assets/words/고유어.json';
 
 export default function App() {
-  const [current, setCurrent] = useState(0);
-  const [shuffledOptions, setShuffledOptions] = useState([]);
-
-  const question = words[current];
-  const total = words.length;
+  const [index, setIndex] = useState(0);
+  const [shuffled, setShuffled] = useState([]);
+  const question = words[index];
 
   useEffect(() => {
-    if (question) {
-      const options = [question.answer];
-      const others = words
-        .filter((w) => w.answer !== question.answer)
-        .map((w) => w.answer);
-      while (options.length < 4 && others.length) {
-        const rand = others.splice(Math.floor(Math.random() * others.length), 1)[0];
-        if (!options.includes(rand)) options.push(rand);
-      }
-      setShuffledOptions(shuffleArray(options));
+    const answers = [question.answer];
+    const other = words.filter(w => w.answer !== question.answer).map(w => w.answer);
+    while (answers.length < 4 && other.length) {
+      const choice = other.splice(Math.floor(Math.random() * other.length), 1)[0];
+      if (!answers.includes(choice)) answers.push(choice);
     }
-  }, [current]);
+    setShuffled(shuffleArray(answers));
+  }, [index]);
 
   const shuffleArray = (array) => {
-    return array.sort(() => Math.random() - 0.5);
+    return [...array].sort(() => Math.random() - 0.5);
   };
 
-  const checkAnswer = (selected) => {
-    const correct = question.answer;
-    if (selected === correct) {
-      Alert.alert('🎯 정답입니다!');
+  const check = (ans) => {
+    if (ans === question.answer) {
+      alert('✅ 정답입니다!');
     } else {
-      Alert.alert(`❌ 오답! 정답은: ${correct}`);
+      alert(`❌ 오답! 정답은 ${question.answer}`);
     }
 
     setTimeout(() => {
-      if (current + 1 < total) {
-        setCurrent(current + 1);
+      if (index + 1 < words.length) {
+        setIndex(index + 1);
       } else {
-        Alert.alert("✅ 퀴즈 완료!", "모든 문제를 풀었습니다!");
-        setCurrent(0);
+        alert("🎉 퀴즈 완료!");
+        setIndex(0);
       }
-    }, 800);
+    }, 600);
   };
-
-  if (!question) return <Text>Loading...</Text>;
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>🧠 고유어 퀴즈</Text>
       <Text style={styles.question}>{question.question}</Text>
-
-      {shuffledOptions.map((opt, index) => (
-        <TouchableOpacity
-          key={index}
-          style={styles.option}
-          onPress={() => checkAnswer(opt)}
-        >
+      {shuffled.map((opt, i) => (
+        <TouchableOpacity key={i} onPress={() => check(opt)} style={styles.option}>
           <Text style={styles.optionText}>{opt}</Text>
         </TouchableOpacity>
       ))}
-
-      <Text style={styles.progress}>
-        {current + 1} / {total}
-      </Text>
+      <Text style={styles.progress}>{index + 1} / {words.length}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#111',
     paddingTop: 80,
     paddingHorizontal: 20,
+    backgroundColor: '#111',
+    flex: 1
   },
   title: {
-    fontSize: 28,
-    color: '#00ffd5',
-    marginBottom: 30,
+    fontSize: 26,
     fontWeight: 'bold',
-    textAlign: 'center',
+    color: '#00ffd5',
+    marginBottom: 20,
+    textAlign: 'center'
   },
   question: {
-    fontSize: 22,
-    color: '#fff',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  option: {
-    backgroundColor: '#222',
-    padding: 15,
-    borderRadius: 10,
-    marginVertical: 8,
-  },
-  optionText: {
     fontSize: 20,
     color: '#fff',
-    textAlign: 'center',
+    marginBottom: 20,
+    textAlign: 'center'
+  },
+  option: {
+    backgroundColor: '#333',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10
+  },
+  optionText: {
+    color: '#fff',
+    fontSize: 18,
+    textAlign: 'center'
   },
   progress: {
-    marginTop: 30,
-    fontSize: 18,
-    color: '#888',
-    textAlign: 'center',
-  },
+    color: '#aaa',
+    fontSize: 16,
+    marginTop: 20,
+    textAlign: 'center'
+  }
 });
