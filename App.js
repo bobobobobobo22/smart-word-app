@@ -9,11 +9,15 @@ export default function App() {
 
   useEffect(() => {
     const answers = [question.answer];
-    const other = words.filter(w => w.answer !== question.answer).map(w => w.answer);
+    const other = words
+      .filter(w => w.answer !== question.answer)
+      .map(w => w.answer);
+
     while (answers.length < 4 && other.length) {
       const choice = other.splice(Math.floor(Math.random() * other.length), 1)[0];
       if (!answers.includes(choice)) answers.push(choice);
     }
+
     setShuffled(shuffleArray(answers));
   }, [index]);
 
